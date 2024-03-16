@@ -1,0 +1,21 @@
+@import '@fontsource/fira-mono';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: 'SequelBlack45';
+    src: url('../lib/assets/Sequel100Black-45.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'SequelWide90';
+    src: url('../lib/assets/Sequel 100 Wide 95.ttf') format('truetype');
+}
+@font-face {
+    font-family: 'Grotesk';
+    src: url('../lib/assets/SpaceGrotesk-VariableFont_wght.ttf') format('truetype');
+}
+
+body {
+    font-family: 'SequelWide90', sans-serif;
+}
