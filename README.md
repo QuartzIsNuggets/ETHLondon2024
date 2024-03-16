@@ -11,9 +11,6 @@ The *end service* is the service using our framework.
 The *Trajectory Enforcer* is a smart contract deployed on Arbitrum (Stylus) that can
 create contracts binding the following two actors.
 
-The *Trajectory Oracle* observes contract states as they unfold and alerts of
-potential contract failures.
-
 The *route issuer* wants a travel to be done following a given path. It pays for the
 filling of the route, for the gas and for the Oracle.
 
@@ -29,32 +26,31 @@ steps are common.
 2. Using a software provided by the framework, data needed to enforce the route is
    derived from the exact route.
 3. The route issuer issues a contract on the Trajectory Enforcer, pre-paying for
-   however much the end service would like, the expected gas usage and the
-   Trajectory Oracle. It includes how much the collateral is expected to be.
+   however much the end service would like and the expected gas usage. The contract
+   holds how much the collateral is expected to be.
 4. Using the external service, a route filler is selected/elected/etc. It activates
-   the contract instance by paying a collateral, which includes an upper bound of
-   gas fees and payment of the Trajectory Oracle.
+   the contract instance by paying a collateral to cover an upper bound of gas fees.
+5. A software provided by the framework observes the advancement of the contract.
 
 ### Honest contract filling
 
-5. The route filler sends the expected updates to the contract at the expected times.
-6. The contract detects the arrival. It pays the Trajectory Oracle, and moves the
-   rest to the filler's address - paying for the filling and the gas.
-7. The contract entry is now deleted from the Trajectory Enforcer.
-8. The Trajectory Oracle observes the deletion and informs the end service.
+6. The route filler sends the expected updates to the contract at the expected times.
+7. The contract detects the arrival. It pays for the filling and the gas to the
+   filler's address.
+8. The contract entry is now deleted from the Trajectory Enforcer.
 
 ### Dishonest contract fillings
 
 ##### Updating the contract with bad positions
 
-5. The route filler gets off-road too much or doesn't move.
-6. The contract detects the issue, and sets itself in alert mode. It is locked.
-7. The Trajectory Oracle observes the issue and informs the end service.
-8. The end service has control over the contract and arbitrates.
+6. The route filler gets off-road too much or doesn't move.
+7. The contract detects the issue, and sets itself in alert mode. It is locked.
+8. The software run by the issuer informs the end service.
+9. The end service has control over the contract and arbitrates.
 
 ##### Not updating the contract
 
-5. The route filler fails to send updates on time.
-6. The Trajectory Oracle detects the issue. It informs the end service and locks the
-   contract.
-7. The end service has control over the contract and arbitrates.
+6. The route filler fails to send updates on time.
+7. The software run by the issuer detects the issue. It informs the end service and
+   locks the contract.
+8. The end service has control over the contract and arbitrates.
