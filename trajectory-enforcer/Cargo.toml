@@ -1,16 +1,22 @@
 [package]
-name = "trajectory-enfocer"
+name = "trajectory-enforcer"
 version = "0.1.0"
 authors = ["Quartz Nuggets <148455809+QuartzIsNuggets@users.noreply.github.com>", "Luc Sanglas-Finkel <sanglasluc@live.fr>"]
 edition = "2021"
 
 [dependencies]
+alloy-primitives = "0.6.4"
+alloy-sol-types = "0.6.4"
 mini-alloc = "0.4.2"
 stylus-sdk = "0.4.2"
 
 [features]
 debug = ["stylus-sdk/debug"]
 export-abi = ["stylus-sdk/export-abi"]
+
+[[bin]]
+name = "trajectory-enforcer"
+path = "src/main.rs"
 
 [lib]
 crate-type = ["lib", "cdylib"]
