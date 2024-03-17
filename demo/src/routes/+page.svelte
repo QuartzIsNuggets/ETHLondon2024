@@ -1,5 +1,5 @@
 <script>
-    import {create_new_contract} from "./transaction.js";
+    import {activate_contract, arbitrate, check_state, create_new_contract, upload_position} from "./transaction.js";
 	import Eurotaxisimulator from '$lib/components/Eurotaxisimulator.svelte'
 	import arbitrum_logo_src from '$lib/assets/logo_monochrome.svg'
     import stylus_logo_src from '$lib/assets/stylus_white.svg'
@@ -15,12 +15,17 @@
     let arrival_index = $state(2);
 	let driver_index = $state(0);
 
+    let contract_id = 1;
     let filler_id = $state('');
     const checkpoints = [[8, 8], [22, 14], [28, 36], [38, 43], [55, 55]];
     let points_indexes = $state([3, 4, 5, 6, 7]);
 
-    async function handle_send_transaction() {
-        await create_new_contract(1, filler_id, 42, checkpoints);
+    async function handle_create_contract() {
+        await create_new_contract(contract_id, filler_id, 42, checkpoints);
+    }
+
+    async function handle_activate_contract() {
+		await activate_contract(contract_id, 42);
         departure_index = 0;
         driver_index = departure_index;
         arrival_index = 4095;
@@ -31,28 +36,33 @@
             checkpoints[3][0] * 64 + checkpoints[3][1],
             checkpoints[4][0] * 64 + checkpoints[4][1],
         ];
-    }
-
-    async function handle_pay_collateral() {
-
 	}
 
     async function handle_unlock() {
-
+        await arbitrate(contract_id, 1);
+        polled_status = 2;
 	}
     async function handle_refund() {
-
+		await arbitrate(contract_id, 2);
+        polled_status = 5;
     }
 
-    async function send_position() {
-        driver_index;
+    async function handle_upload_position() {
+        await upload_position(contract_id, driver_index);
 	}
 
-    const interval_id = setInterval(send_position, 1000);
+    async function handle_check_state() {
+       polled_status = await check_state(contract_id);
+	}
+
+    const position_interval = setInterval(handle_upload_position, 1000);
+    const state_interval = setInterval(handle_check_state, 5000);
 
     $effect(() => {
-       if (polled_status > 3)
-           clearInterval(interval_id);
+       if (polled_status > 3) {
+           clearInterval(position_interval);
+           clearInterval(state_interval);
+       }
 	});
 </script>
 
@@ -88,13 +98,13 @@
 		<p class="text-4xl font-black">CLIENT</p>
 		<div class="flex flex-col gap-3">
 			<input class="w-full text-xl font-black outline-0 bg-transparent border-b border-[#737082]" bind:value={filler_id} placeholder="filler ID" />
-			<button class="border border-[#737082] w-full px-3 py-1.5 rounded-md" onclick={handle_send_transaction}>Issue contract (pre-baked)</button>
+			<button class="border border-[#737082] w-full px-3 py-1.5 rounded-md" onclick={handle_create_contract}>Issue contract (pre-baked)</button>
 		</div>
 	</div>
 	<div class="h-full w-1/2 flex flex-col gap-6 px-14">
 		<p class="text-4xl font-black">DRIVER</p>
 		<div class="flex flex-col gap-3">
-			<button class="border border-[#737082] w-full px-3 py-1.5 rounded-md" onclick={handle_pay_collateral}>Pay collateral</button>
+			<button class="border border-[#737082] w-full px-3 py-1.5 rounded-md" onclick={handle_activate_contract}>Activate contract (pay collateral)</button>
 		</div>
 	</div>
 </div>
@@ -105,7 +115,7 @@
 	<p class="text-white text-6xl font-bold">POLLED</p>
 	<div class="flex w-full justify-between">
 		<p class="text-white text-6xl font-bold">STATUS</p>
-		<p class="text-white text-6xl font-bold">{status_message}</p>
+		<p class="text-white text-6xl font-bold border-b border-white">{status_message}</p>
 	</div>
 </div>
 <div class="row-span-3 flex border-t border-inherit">
